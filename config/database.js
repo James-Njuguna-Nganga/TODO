@@ -1,5 +1,8 @@
-import { Pool } from 'pg';
-require('dotenv').config();
+import pkg from 'pg';
+const { Pool } = pkg; 
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const { DB_USER, DB_HOST, DB_NAME, DB_PASSWORD, DB_PORT } = process.env;
 
@@ -11,7 +14,7 @@ const pool = new Pool({
     port: DB_PORT
 });
 
-const connectionStatus  = async () => {
+const connectDB = async () => {
     try {
         const client = await pool.connect();
         console.log('Connected to the database successfully!');
@@ -21,6 +24,5 @@ const connectionStatus  = async () => {
     }
 };
 
-connectionStatus();
 
-export default pool; 
+export { connectDB, pool };
