@@ -1,6 +1,29 @@
 import express from 'express';
+import cors from 'cors';
+import swaggerUi from 'swagger-ui-express';
+import register from './routes/register.js';
+
+import swaggerDefinition from './swagger.json' assert { type: 'json' };
+
+
+
 const app = express();
 
-app.use(express.json());
+app.use(express.json()); 
 
-module.exports = app;
+app.use(cors());
+ 
+  
+const baseUrl = '/mytodo/v1';
+
+// Mount routes
+app.use(baseUrl + '/register', register);
+
+// Mount Swagger
+app.use(
+  baseUrl + '/swagger',
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerDefinition),
+);
+
+export default app;
