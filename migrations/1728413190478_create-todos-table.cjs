@@ -8,7 +8,7 @@ exports.up = async (pgm) => {
       user_id: {
         type: 'integer',
         notNull: true,
-        references: '"users"',  // Assuming you have a users table
+        references: '"users"',  
         onDelete: 'CASCADE',
       },
       title: {
