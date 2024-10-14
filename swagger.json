@@ -13,6 +13,20 @@
       "url": "https://mytodo.com/mytodo/v1"
     }
   ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
   "paths": {
     "/register": {
       "post": {
@@ -36,7 +50,8 @@
                     "format": "password",
                     "example": "securePassword123"
                   }
-                }
+                },
+                "required": ["email", "password"]
               }
             }
           }
@@ -160,8 +175,8 @@
     "/requestPassword": {
       "post": {
         "tags": ["User Management"],
-        "summary": "Request password reset",
-        "description": "Sends a password reset link to the user's email.",
+        "summary": "Request password reset link",
+        "description": "Sends a reset password link to the user's email",
         "requestBody": {
           "required": true,
           "content": {
@@ -182,7 +197,7 @@
         },
         "responses": {
           "200": {
-            "description": "Password reset link sent successfully",
+            "description": "Reset link sent successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -194,15 +209,93 @@
                     },
                     "message": {
                       "type": "string",
-                      "example": "Password reset link has been sent to your email."
+                      "example": "Reset link sent to email"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "404": {
+          "description": "User not found",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": {
+                    "type": "boolean",
+                    "example": false
+                  },
+                  "message": {
+                    "type": "string",
+                    "example": "User not found"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/resetPassword/{token}": {
+      "post": {
+        "tags": ["User Management"],
+        "summary": "Reset user's password",
+        "description": "Resets the user's password using a token received via email",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "token1234"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "newPassword": {
+                    "type": "string",
+                    "format": "password",
+                    "example": "newSecurePassword123"
+                  }
+                },
+                "required": ["newPassword"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password reset successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Password reset successfully"
                     }
                   }
                 }
               }
             }
           },
-          "404": {
-            "description": "Email not found",
+          "400": {
+            "description": "Invalid token or password",
             "content": {
               "application/json": {
                 "schema": {
@@ -214,7 +307,7 @@
                     },
                     "message": {
                       "type": "string",
-                      "example": "Email not found."
+                      "example": "Invalid token or password"
                     }
                   }
                 }
@@ -244,14 +337,133 @@
         }
       }
     },
-    "/resetPassword/{token}": {
-      "post": {
-        "tags": ["User Management"],
-        "summary": "Reset password",
-        "description": "Resets the user's password using the reset token.",
+    "/todos": {
+      "get": {
+        "tags": ["Todo Management"],
+        "summary": "Fetch all TODOs",
+        "description": "Fetches all TODOs with pagination and filtering options",
         "parameters": [
           {
-            "name": "token",
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "example": 10
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "active"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "TODOs fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "example": "1"
+                          },
+                          "title": {
+                            "type": "string",
+                            "example": "Buy groceries"
+                          },
+                          "description": {
+                            "type": "string",
+                            "example": "Buy milk, bread, and eggs"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Todo Management"],
+        "summary": "Create a new TODO",
+        "description": "Creates a new TODO for a logged-in user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "example": "Buy groceries"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Buy milk, bread, and eggs"
+                  }
+                },
+                "required": ["title", "description"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "TODO created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "TODO created successfully"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/todos/{id}": {
+      "patch": {
+        "tags": ["Todo Management"],
+        "summary": "Update a TODO",
+        "description": "Updates a specific TODO by ID",
+        "parameters": [
+          {
+            "name": "id",
             "in": "path",
             "required": true,
             "schema": {
@@ -266,20 +478,22 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "password": {
+                  "title": {
                     "type": "string",
-                    "format": "password",
-                    "example": "newSecurePassword123"
+                    "example": "Buy groceries - updated"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Buy milk, bread, eggs, and butter"
                   }
-                },
-                "required": ["password"]
+                }
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Password reset successfully",
+            "description": "TODO updated successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -291,15 +505,15 @@
                     },
                     "message": {
                       "type": "string",
-                      "example": "Password has been reset successfully."
+                      "example": "TODO updated successfully"
                     }
                   }
                 }
               }
             }
           },
-          "400": {
-            "description": "Invalid token",
+          "404": {
+            "description": "TODO not found",
             "content": {
               "application/json": {
                 "schema": {
@@ -311,15 +525,52 @@
                     },
                     "message": {
                       "type": "string",
-                      "example": "Invalid or expired token."
+                      "example": "TODO not found"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Todo Management"],
+        "summary": "Soft delete a TODO",
+        "description": "Marks a TODO as deleted without permanently removing it",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "TODO soft-deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "TODO soft-deleted successfully"
                     }
                   }
                 }
               }
             }
           },
-          "500": {
-            "description": "Server error",
+          "404": {
+            "description": "TODO not found",
             "content": {
               "application/json": {
                 "schema": {
@@ -331,7 +582,7 @@
                     },
                     "message": {
                       "type": "string",
-                      "example": "Server error"
+                      "example": "TODO not found"
                     }
                   }
                 }
