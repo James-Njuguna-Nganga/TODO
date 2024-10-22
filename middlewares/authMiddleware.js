@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 
 export const authenticateUser = (req, res, next) => {
-  const token = req.headers["authorization"]?.split(" ")[1]; // Bearer <token>
+  const token = req.headers["authorization"]?.split(" ")
 
   if (!token) {
     return res

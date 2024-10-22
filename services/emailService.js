@@ -1,7 +1,4 @@
 import nodemailer from 'nodemailer';
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 const transport = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
@@ -13,16 +10,14 @@ const transport = nodemailer.createTransport({
 });
 
 export const sendEmail = async (to, subject, text) => {
-  try {
-    const mailOptions = {
-      from: process.env.SMTP_USER,
-      to,
-      subject,
-      text,
-    };
+  await transport.sendMail({
+    from: process.env.SMTP_USER,
+    to,
+    subject,
+    text,
+  });
+};
 
-    await transport.sendMail(mailOptions);
-  } catch (error) {
-    throw new Error('Error sending email');
-  }
+export const generateResetUrl = (token) => {
+  return `${process.env.RESET_BASE_URL}?token=${token}`;
 };
