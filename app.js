@@ -4,7 +4,7 @@ import swaggerUi from "swagger-ui-express";
 import register from "./routes/register.js";
 import login from "./routes/login.js";
 import resetPasswordRoutes from "./routes/resetPasswordRoutes.js";
-import todoRoutes from "./routes/todos.js";
+import todos from "./routes/todos.js";
 import rateLimit from "express-rate-limit";
 import swaggerDefinition from "./swagger.json" assert { type: "json" };
 
@@ -24,8 +24,8 @@ const baseUrl = "/mytodo/v1";
 
 app.use(baseUrl + "/register", register);
 app.use(baseUrl + "/login", login);
-app.use(baseUrl, resetPasswordRoutes);
-app.use(baseUrl + "/todos", todoRoutes);
+app.use(baseUrl + "/requestPassword","/resetPassword/:token", resetPassword);
+app.use(baseUrl + "/todos", todos);
 
 app.use(
   baseUrl + "/swagger",
